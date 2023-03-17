@@ -1,0 +1,18 @@
+[submodule "OpenGLLoadModel/vender/assimp"]
+	path = OpenGLLoadModel/vender/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "OpenGLLoadModel/vender/AssimpPremake"]
+	path = OpenGLLoadModel/vender/AssimpPremake
+	url = https://github.com/Geqianyu/AssimpPremake.git
+[submodule "OpenGLLoadModel/vender/glfw"]
+	path = OpenGLLoadModel/vender/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "OpenGLLoadModel/vender/glm"]
+	path = OpenGLLoadModel/vender/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "OpenGLLoadModel/vender/spdlog"]
+	path = OpenGLLoadModel/vender/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "OpenGLLoadModel/vender/stb"]
+	path = OpenGLLoadModel/vender/stb
+	url = https://github.com/nothings/stb.git
