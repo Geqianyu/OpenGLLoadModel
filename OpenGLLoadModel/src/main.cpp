@@ -15,8 +15,11 @@ void scroll_callback(GLFWwindow* _window, double _x_offset, double _y_offset);
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
+// light
+glm::vec3 light_position(100.0f, 100.0f, 200.0f);
+
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
 float last_x = SCREEN_WIDTH / 2.0f;
 float last_y = SCREEN_WIDTH / 2.0f;
 bool first_mouse = true;
@@ -37,7 +40,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    GLFWwindow* window = glfwCreateWindow(800, 500, "LearnOpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, 600, "LearnOpenGL", nullptr, nullptr);
     if (window == nullptr)
     {
         GQY_OPENGL_LOAD_MODEL_ERROR("Failed to create GLFW window");
@@ -59,7 +62,10 @@ int main()
     }
 
     glEnable(GL_DEPTH_TEST);
-    Shader shader_program("asset/shader/VertexShader.vert.glsl", "asset/shader/FragmentShader.frag.glsl");
+    // Shader shader_program("asset/shader/loadModel.vert.glsl", "asset/shader/loadModel.frag.glsl");
+
+    Shader shader_program("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
+
     Model model_obj("asset/obj/nanosuit/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
@@ -74,16 +80,18 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader_program.use();
+
+        shader_program.set_vec3("light_position", light_position);
+        shader_program.set_vec3("camera_position", camera.get_position());
         
         glm::mat4 projection = glm::perspective(glm::radians(camera.get_zoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.get_view_matrix();
         shader_program.set_matrix4("projection", projection);
         shader_program.set_matrix4("view", view);
 
-        // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         shader_program.set_matrix4("model", model);
         model_obj.draw(shader_program);
 

@@ -25,12 +25,12 @@ public:
     Shader(const std::string& _vertex_shader_path, const std::string& _fragment_shader_path);
     ~Shader();
 
-    inline GLuint ID() const
+    inline GLuint get_id() const
     {
         return m_id;
     }
 
-    inline void use()
+    inline void use() const
     {
         glUseProgram(m_id);
     }

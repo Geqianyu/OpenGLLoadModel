@@ -3,10 +3,8 @@
 #define GQY_MODEL_H
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <map>
 #include <vector>
+#include <memory>
 
 #include <glad/glad.h> 
 
@@ -19,7 +17,7 @@
 #include "Mesh/Mesh.h"
 #include "Shader/Shader.h"
 
-GLuint texture_from_file(const std::string& _path, const std::string& _directory, bool gamma = false);
+GLuint texture_from_file(const std::string& _path, const std::string& _directory, bool _gamma = false);
 
 class Model
 {
@@ -32,22 +30,21 @@ public:
 
     void draw(const Shader& _shader)
     {
-        for (Mesh mesh : m_meshes)
+        for (std::shared_ptr<Mesh>& mesh : m_meshes)
         {
-            mesh.draw(_shader);
+            mesh->draw(_shader);
         }
     }
 
 private:
     void load_model(const std::string& _path);
     void process_node(aiNode* _node, const aiScene* _scene);
-    Mesh process_mesh(aiMesh* _mesh, const aiScene* _scene);
-    std::vector<Texture> load_material_textures(aiMaterial* _mat, aiTextureType _type, const std::string& _type_name);
+    std::shared_ptr<Mesh> process_mesh(aiMesh* _mesh, const aiScene* _scene);
+    std::vector<Texture> load_material_textures(aiMaterial* _material, aiTextureType _type, const std::string& _type_name);
 
 private:
-    // model data 
-    std::vector<Texture> m_textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-    std::vector<Mesh>    m_meshes;
+    std::vector<Texture> m_textures_loaded;
+    std::vector<std::shared_ptr<Mesh>> m_meshes;
     std::string m_directory;
     bool m_gamma_correction;
 };

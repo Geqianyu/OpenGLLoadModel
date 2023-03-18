@@ -14,24 +14,25 @@
 
 constexpr int MAX_BONE_INFLUENCE = 4;
 
-struct Vertex {
-    // position
+struct Vertex
+{
+    Vertex() = default;
+    ~Vertex() = default;
+
     glm::vec3 position;
-    // normal
     glm::vec3 normal;
-    // texCoords
     glm::vec2 tex_coords;
-    // tangent
     glm::vec3 tangent;
-    // bitangent
     glm::vec3 bitangent;
-    //bone indexes which will influence this vertex
     int bone_ids[MAX_BONE_INFLUENCE];
-    //weights from each bone
     float weights[MAX_BONE_INFLUENCE];
 };
 
-struct Texture {
+struct Texture
+{
+    Texture(GLuint _id, const std::string& _type, const std::string& _path) : id(_id), type(_type), path(_path) {}
+    ~Texture() = default;
+
     GLuint id;
     std::string type;
     std::string path;
@@ -40,16 +41,16 @@ struct Texture {
 class Mesh
 {
 public:
-    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<Texture>& _textures)
+    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<Texture>& _textures) : m_vertices(_vertices), m_indices(_indices), m_textures(_textures)
     {
-        this->m_vertices = _vertices;
-        this->m_indices = _indices;
-        this->m_textures = _textures;
-
-        // now that we have all the required data, set the vertex buffers and its attribute pointers.
         setup_mesh();
     }
-    ~Mesh() = default;
+    ~Mesh()
+    {
+        glDeleteBuffers(1, &m_EBO);
+        glDeleteBuffers(1, &m_VBO);
+        glDeleteVertexArrays(1, &m_VAO);
+    }
 
     void draw(const Shader& _shader);
 

@@ -8,11 +8,11 @@
 
 #include <vector>
 
-const float YAW = -90.0f;
-const float PITCH = 0.0f;
-const float SPEED = 2.5f;
-const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.0f;
+extern const float YAW;
+extern const float PITCH;
+extern const float SPEED;
+extern const float SENSITIVITY;
+extern const float ZOOM;
 
 enum class Camera_move_direction
 {
@@ -37,17 +37,26 @@ public:
     inline void process_keyboard(const Camera_move_direction& _direction, const float& _delta_time)
     {
         float velocity = m_movement_speed * _delta_time;
-        if (_direction == Camera_move_direction::Forward)
+        switch (_direction)
+        {
+        case Camera_move_direction::Forward:
             m_position += m_front * velocity;
-        if (_direction == Camera_move_direction::Backward)
+            break;
+        case Camera_move_direction::Backward:
             m_position -= m_front * velocity;
-        if (_direction == Camera_move_direction::Left)
+            break;
+        case Camera_move_direction::Left:
             m_position -= m_right * velocity;
-        if (_direction == Camera_move_direction::Right)
+            break;
+        case Camera_move_direction::Right:
             m_position += m_right * velocity;
+            break;
+        default:
+            break;
+        }
     }
 
-    inline void process_mouse_movement(float _xoffset, float _yoffset, const GLboolean& constrain_pitch = true)
+    inline void process_mouse_movement(float _xoffset, float _yoffset, const GLboolean& _constrain_pitch = true)
     {
         _xoffset *= m_mouse_sensitivity;
         _yoffset *= m_mouse_sensitivity;
@@ -55,8 +64,7 @@ public:
         m_yaw += _xoffset;
         m_pitch += _yoffset;
 
-        // make sure that when pitch is out of bounds, screen doesn't get flipped
-        if (constrain_pitch)
+        if (_constrain_pitch)
         {
             if (m_pitch > 89.0f)
             {
@@ -68,7 +76,6 @@ public:
             }
         }
 
-        // update Front, Right and Up Vectors using the updated Euler angles
         update_camera_vectors();
     }
 
@@ -90,34 +97,33 @@ public:
         return m_zoom;
     }
 
+    inline glm::vec3 get_position() const
+    {
+        return m_position;
+    }
+
 private:
     inline void update_camera_vectors()
     {
-        // calculate the new Front vector
-        glm::vec3 front;
-        front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-        front.y = sin(glm::radians(m_pitch));
-        front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+        glm::vec3 front(cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)), sin(glm::radians(m_pitch)), sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)));
         m_front = glm::normalize(front);
-        // also re-calculate the Right and Up vector
-        m_right = glm::normalize(glm::cross(m_front, m_world_up));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+        m_right = glm::normalize(glm::cross(m_front, m_world_up));
         m_up = glm::normalize(glm::cross(m_right, m_front));
     }
 
 private:
-    // camera Attributes
     glm::vec3 m_position;
-    glm::vec3 m_front;
+    glm::vec3 m_front{ glm::vec3(0.0f, 0.0f, -1.0f) };
     glm::vec3 m_up;
     glm::vec3 m_right;
     glm::vec3 m_world_up;
-    // euler Angles
+
     float m_yaw;
     float m_pitch;
-    // camera options
-    float m_movement_speed;
-    float m_mouse_sensitivity;
-    float m_zoom;
+
+    float m_movement_speed{ SPEED };
+    float m_mouse_sensitivity{ SENSITIVITY };
+    float m_zoom{ ZOOM };
 };
 
 #endif // !GQY_CAMERA_H
