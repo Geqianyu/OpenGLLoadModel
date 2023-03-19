@@ -6,6 +6,7 @@
 #include "Shader/Shader.h"
 #include "Camera/Camera.h"
 #include "Model/Model.h"
+#include "Light/Light.h"
 
 void framebuffer_size_callback(GLFWwindow* _window, int _width, int _height);
 void process_inport(GLFWwindow* _window);
@@ -14,9 +15,6 @@ void scroll_callback(GLFWwindow* _window, double _x_offset, double _y_offset);
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
-
-// light
-glm::vec3 light_position(100.0f, 100.0f, 200.0f);
 
 // camera
 Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
@@ -62,11 +60,16 @@ int main()
     }
 
     glEnable(GL_DEPTH_TEST);
+
     // Shader shader_program("asset/shader/loadModel.vert.glsl", "asset/shader/loadModel.frag.glsl");
 
     Shader shader_program("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
+    Shader light_shader("asset/shader/lightShader.vert.glsl", "asset/shader/lightShader.frag.glsl");
+
+    Light light(glm::vec3(10.0f, 20.0f, 10.0f), glm::vec3(2.0f, 2.0f, 2.0f));
 
     Model model_obj("asset/obj/nanosuit/nanosuit.obj");
+    Model floor_obj("asset/obj/floor/floor.obj");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -79,21 +82,31 @@ int main()
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader_program.use();
-
-        shader_program.set_vec3("light_position", light_position);
-        shader_program.set_vec3("camera_position", camera.get_position());
-        
         glm::mat4 projection = glm::perspective(glm::radians(camera.get_zoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.get_view_matrix();
-        shader_program.set_matrix4("projection", projection);
-        shader_program.set_matrix4("view", view);
-
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        light_shader.use();
+        light_shader.set_matrix4("projection", projection);
+        light_shader.set_matrix4("view", view);
+        light_shader.set_matrix4("model", model);
+        light_shader.set_vec3("offset", light.get_position());
+        light.draw(light_shader);
+
+        shader_program.use();
+        shader_program.set_vec3("light.position", light.get_position());
+        shader_program.set_vec3("light.intensity", light.get_intensity());
+        shader_program.set_float("light.constant", light.get_constant());
+        shader_program.set_float("light.linear", light.get_linear());
+        shader_program.set_float("light.quadratic", light.get_quadratic());
+        shader_program.set_vec3("camera_position", camera.get_position());
+        shader_program.set_matrix4("projection", projection);
+        shader_program.set_matrix4("view", view);
         shader_program.set_matrix4("model", model);
         model_obj.draw(shader_program);
+        floor_obj.draw(shader_program);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
