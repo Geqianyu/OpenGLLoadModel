@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 #include <glad/glad.h> 
 
@@ -16,8 +17,7 @@
 
 #include "Mesh/Mesh.h"
 #include "Shader/Shader.h"
-
-GLuint texture_from_file(const std::string& _path, const std::string& _directory, bool _gamma = false);
+#include "Material/Material.h"
 
 class Model
 {
@@ -40,10 +40,8 @@ private:
     void load_model(const std::string& _path);
     void process_node(aiNode* _node, const aiScene* _scene);
     std::shared_ptr<Mesh> process_mesh(aiMesh* _mesh, const aiScene* _scene);
-    std::vector<Texture> load_material_textures(aiMaterial* _material, aiTextureType _type, const std::string& _type_name);
 
 private:
-    std::vector<Texture> m_textures_loaded;
     std::vector<std::shared_ptr<Mesh>> m_meshes;
     std::string m_directory;
     bool m_gamma_correction;

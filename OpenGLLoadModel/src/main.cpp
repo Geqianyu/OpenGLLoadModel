@@ -66,7 +66,7 @@ int main()
     Shader shader_program("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
     Shader light_shader("asset/shader/lightShader.vert.glsl", "asset/shader/lightShader.frag.glsl");
 
-    Light light(glm::vec3(10.0f, 20.0f, 10.0f), glm::vec3(2.0f, 2.0f, 2.0f));
+    Light light(glm::vec3(20.0f, 20.0f, 20.0f), glm::vec3(50.0f, 50.0f, 50.0f));
 
     Model model_obj("asset/obj/nanosuit/nanosuit.obj");
     Model floor_obj("asset/obj/floor/floor.obj");
@@ -85,8 +85,6 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(camera.get_zoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.get_view_matrix();
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
         light_shader.use();
         light_shader.set_matrix4("projection", projection);
@@ -158,7 +156,7 @@ void mouse_callback(GLFWwindow* _window, double _x_position, double _y_position)
     }
 
     float xoffset = xpos - last_x;
-    float yoffset = last_y - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = last_y - ypos;
 
     last_x = xpos;
     last_y = ypos;

@@ -3,37 +3,7 @@
 
 void Mesh::draw(const Shader& _shader)
 {
-    GLuint diffuse_index = 1;
-    GLuint specular_index = 1;
-    GLuint normal_index = 1;
-    GLuint height_index = 1;
-    GLuint texture_index = 0;
-    for (Texture& texture : m_textures)
-    {
-        glActiveTexture(GL_TEXTURE0 + texture_index);
-    
-        const std::string& name = texture.type;
-        if (name == "texture_diffuse")
-        {
-            glUniform1i(glGetUniformLocation(_shader.get_id(), (name + std::to_string(diffuse_index++)).c_str()), texture_index);
-        }
-        else if (name == "texture_specular")
-        {
-            glUniform1i(glGetUniformLocation(_shader.get_id(), (name + std::to_string(specular_index++)).c_str()), texture_index);
-        }
-        else if (name == "texture_normal")
-        {
-            glUniform1i(glGetUniformLocation(_shader.get_id(), (name + std::to_string(normal_index++)).c_str()), texture_index);
-        }
-        else if (name == "texture_height")
-        {
-            glUniform1i(glGetUniformLocation(_shader.get_id(), (name + std::to_string(height_index++)).c_str()), texture_index);
-        }
-    
-        glBindTexture(GL_TEXTURE_2D, texture.id);
-        ++texture_index;
-    }
-
+    m_material->bind_material(_shader);
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -68,12 +38,6 @@ void Mesh::setup_mesh()
 
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
     glEnableVertexAttribArray(4);
-    
-    glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, bone_ids));
-    glEnableVertexAttribArray(5);
-    
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights));
-    glEnableVertexAttribArray(6);
 
     glBindVertexArray(0);
 }

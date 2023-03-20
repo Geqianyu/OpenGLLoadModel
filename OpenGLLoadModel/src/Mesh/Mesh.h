@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include <glad/glad.h>
 
@@ -11,37 +12,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Shader/Shader.h"
-
-constexpr int MAX_BONE_INFLUENCE = 4;
-
-struct Vertex
-{
-    Vertex() = default;
-    ~Vertex() = default;
-
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 tex_coords;
-    glm::vec3 tangent;
-    glm::vec3 bitangent;
-    int bone_ids[MAX_BONE_INFLUENCE];
-    float weights[MAX_BONE_INFLUENCE];
-};
-
-struct Texture
-{
-    Texture(GLuint _id, const std::string& _type, const std::string& _path) : id(_id), type(_type), path(_path) {}
-    ~Texture() = default;
-
-    GLuint id;
-    std::string type;
-    std::string path;
-};
+#include "Material/Material.h"
+#include "Vertex/Vertex.h"
 
 class Mesh
 {
 public:
-    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::vector<Texture>& _textures) : m_vertices(_vertices), m_indices(_indices), m_textures(_textures)
+    Mesh(const std::vector<Vertex>& _vertices, const std::vector<GLuint>& _indices, const std::shared_ptr<Material> _material) : m_vertices(_vertices), m_indices(_indices), m_material(_material)
     {
         setup_mesh();
     }
@@ -58,11 +35,10 @@ private:
     void setup_mesh();
 
 private:
+    std::shared_ptr<Material> m_material;
     std::vector<Vertex> m_vertices;
     std::vector<GLuint> m_indices;
-    std::vector<Texture> m_textures;
     GLuint m_VAO, m_VBO, m_EBO;
 };
-
 
 #endif // !GQY_MESH_H

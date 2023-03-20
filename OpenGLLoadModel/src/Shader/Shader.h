@@ -42,11 +42,11 @@ public:
 
     inline void set_int(const std::string& _name, int _value) const
     {
-        glUniform1i(glGetUniformLocation(m_id, _name.c_str()), static_cast<int>(_value));
+        glUniform1i(glGetUniformLocation(m_id, _name.c_str()), _value);
     }
     inline void set_float(const std::string& _name, float _value) const
     {
-        glUniform1f(glGetUniformLocation(m_id, _name.c_str()), static_cast<int>(_value));
+        glUniform1f(glGetUniformLocation(m_id, _name.c_str()), _value);
     }
 
     inline void set_vec2(const std::string& _name, const glm::vec2& _value) const
@@ -106,7 +106,7 @@ private:
             if (!success)
             {
                 glGetShaderInfoLog(_shader, 1024, nullptr, info_log);
-                GQY_OPENGL_LOAD_MODEL_ERROR("error: shader compilation error.");
+                GQY_OPENGL_LOAD_MODEL_ERROR("error: shader compilation error. " + std::string(info_log));
             }
         }
         else
@@ -115,7 +115,7 @@ private:
             if (!success)
             {
                 glGetProgramInfoLog(_shader, 1024, nullptr, info_log);
-                GQY_OPENGL_LOAD_MODEL_ERROR("error: program linking error");
+                GQY_OPENGL_LOAD_MODEL_ERROR("error: program linking error. " + std::string(info_log));
             }
         }
     }

@@ -10,4 +10,5 @@ void Log::init()
     spdlog::set_pattern("%^[%T] %n: %v%$");
     m_logger = spdlog::stdout_color_mt("OpenGL load model");
     m_logger->set_level(spdlog::level::trace);
+    m_logger->info("Log has been initialized");
 }
