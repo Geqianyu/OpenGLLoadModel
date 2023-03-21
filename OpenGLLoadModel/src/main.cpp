@@ -89,7 +89,7 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    GLfloat near_plane = 20.0f, far_plane = 100.0f;
+    GLfloat near_plane = 10.0f, far_plane = 100.0f;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -102,7 +102,7 @@ int main()
 
         process_inport(window);
 
-        glm::mat4 light_project = glm::perspective(glm::radians(60.0f), 1.0f, near_plane, far_plane);
+        glm::mat4 light_project = glm::perspective(glm::radians(90.0f), 1.0f, near_plane, far_plane);
         glm::mat4 light_view = glm::lookAt(light.get_position(), glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 light_space_matrix = light_project * light_view;
         depth_map_shader.use();

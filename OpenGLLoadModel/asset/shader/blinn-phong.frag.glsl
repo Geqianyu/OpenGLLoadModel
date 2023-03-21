@@ -43,11 +43,20 @@ uniform sampler2D depth_map;
 
 float shadow_calculation(vec3 light_direction)
 {
+    float shadow = 0.0;
+    vec2 depth_map_size = 1.0 / textureSize(depth_map, 0);
+    float bias = max(0.04 * (1.0 - dot(fs_in.fragment_normal, light_direction)), 0.005);
     vec3 projection_coords = fs_in.fragment_position_light_space.xyz / fs_in.fragment_position_light_space.w;
     projection_coords = projection_coords * 0.5 + 0.5;
-    float bias = max(0.035 * (1.0 - dot(fs_in.fragment_normal, light_direction)), 0.0);
-    float map_depth = texture(depth_map, projection_coords.xy).r;
-    float shadow = map_depth < projection_coords.z - bias ? 1.0 : 0.0;
+    for (int x = - 5; x <= 5; ++x)
+    {
+        for (int y = -5; y <= 5; ++y)
+        {
+            float map_depth = texture(depth_map, projection_coords.xy + vec2(x, y) * depth_map_size).r;
+            shadow += map_depth < projection_coords.z - bias ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 121;
     return shadow;
 }
 
