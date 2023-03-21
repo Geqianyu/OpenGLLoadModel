@@ -15,14 +15,14 @@ void scroll_callback(GLFWwindow* _window, double _x_offset, double _y_offset);
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
+const unsigned int SHADOW_WIDTH = 1600;
+const unsigned int SHADOW_HEIGHT = 1200;
 
-// camera
 Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
 float last_x = SCREEN_WIDTH / 2.0f;
 float last_y = SCREEN_WIDTH / 2.0f;
 bool first_mouse = true;
 
-// timing
 float delta_time = 0.0f;
 float last_frame = 0.0f;
 
@@ -38,7 +38,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, 600, "LearnOpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, 600, "OpenGL Load Model", nullptr, nullptr);
     if (window == nullptr)
     {
         GQY_OPENGL_LOAD_MODEL_ERROR("Failed to create GLFW window");
@@ -61,24 +61,61 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // Shader shader_program("asset/shader/loadModel.vert.glsl", "asset/shader/loadModel.frag.glsl");
-
     Shader shader_program("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
     Shader light_shader("asset/shader/lightShader.vert.glsl", "asset/shader/lightShader.frag.glsl");
+    Shader depth_map_shader("asset/shader/depthMap.vert.glsl", "asset/shader/depthMap.frag.glsl");
 
     Light light(glm::vec3(20.0f, 20.0f, 20.0f), glm::vec3(50.0f, 50.0f, 50.0f));
 
     Model model_obj("asset/obj/nanosuit/nanosuit.obj");
     Model floor_obj("asset/obj/floor/floor.obj");
 
+    GLuint depth_map;
+    glGenTextures(1, &depth_map);
+    glBindTexture(GL_TEXTURE_2D, depth_map);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    GLuint depth_map_FBO;
+    glGenFramebuffers(1, &depth_map_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_FBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_map, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    GLfloat near_plane = 20.0f, far_plane = 100.0f;
+
     while (!glfwWindowShouldClose(window))
     {
         float current_frame = static_cast<float>(glfwGetTime());
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
+        float light_position_x = 20.0f * cosf(current_frame);
+        float light_position_z = 20.0f * sinf(current_frame);
+        light.set_position(glm::vec3(light_position_x, 20.0f, light_position_z));
 
         process_inport(window);
 
+        glm::mat4 light_project = glm::perspective(glm::radians(60.0f), 1.0f, near_plane, far_plane);
+        glm::mat4 light_view = glm::lookAt(light.get_position(), glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 light_space_matrix = light_project * light_view;
+        depth_map_shader.use();
+        depth_map_shader.set_matrix4("light_space_matrix", light_space_matrix);
+        depth_map_shader.set_matrix4("model", glm::mat4(1.0f));
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depth_map_FBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        model_obj.draw(depth_map_shader);
+        floor_obj.draw(depth_map_shader);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -103,6 +140,10 @@ int main()
         shader_program.set_matrix4("projection", projection);
         shader_program.set_matrix4("view", view);
         shader_program.set_matrix4("model", model);
+        shader_program.set_matrix4("light_space_matrix", light_space_matrix);
+        glActiveTexture(GL_TEXTURE0);
+        shader_program.set_int("depth_map", 0);
+        glBindTexture(GL_TEXTURE_2D, depth_map);
         model_obj.draw(shader_program);
         floor_obj.draw(shader_program);
 
@@ -110,6 +151,8 @@ int main()
         glfwPollEvents();
     }
 
+    glDeleteFramebuffers(1, &depth_map_FBO);
+    glDeleteTextures(1, &depth_map);
     glfwTerminate();
 }
 

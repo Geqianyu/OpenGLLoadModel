@@ -1,10 +1,10 @@
-
+﻿
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Light.h"
 
-float vertices[] = 
+float vertices[] =
 {
     -1.0f, -1.0f, -1.0f,
      1.0f, -1.0f, -1.0f,
