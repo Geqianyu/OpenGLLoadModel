@@ -13,12 +13,12 @@ void process_inport(GLFWwindow* _window);
 void mouse_callback(GLFWwindow* _window, double _x_position, double _y_position);
 void scroll_callback(GLFWwindow* _window, double _x_offset, double _y_offset);
 
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
-const unsigned int SHADOW_WIDTH = 1600;
-const unsigned int SHADOW_HEIGHT = 1200;
+const unsigned int SCREEN_WIDTH = 1200;
+const unsigned int SCREEN_HEIGHT = 900;
+const unsigned int SHADOW_WIDTH = 2048;
+const unsigned int SHADOW_HEIGHT = 2048;
 
-Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
+Camera camera(glm::vec3(0.0f, 20.0f, 40.0f));
 float last_x = SCREEN_WIDTH / 2.0f;
 float last_y = SCREEN_WIDTH / 2.0f;
 bool first_mouse = true;
@@ -38,7 +38,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, 600, "OpenGL Load Model", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGL Load Model", nullptr, nullptr);
     if (window == nullptr)
     {
         GQY_OPENGL_LOAD_MODEL_ERROR("Failed to create GLFW window");
@@ -61,7 +61,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader shader_program("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
+    Shader obj_shader("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
     Shader light_shader("asset/shader/lightShader.vert.glsl", "asset/shader/lightShader.frag.glsl");
     Shader depth_map_shader("asset/shader/depthMap.vert.glsl", "asset/shader/depthMap.frag.glsl");
 
@@ -96,8 +96,8 @@ int main()
         float current_frame = static_cast<float>(glfwGetTime());
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
-        float light_position_x = 20.0f * cosf(current_frame);
-        float light_position_z = 20.0f * sinf(current_frame);
+        float light_position_x = 10.0f * cosf(current_frame);
+        float light_position_z = 10.0f * sinf(current_frame);
         light.set_position(glm::vec3(light_position_x, 20.0f, light_position_z));
 
         process_inport(window);
@@ -130,22 +130,22 @@ int main()
         light_shader.set_vec3("offset", light.get_position());
         light.draw(light_shader);
 
-        shader_program.use();
-        shader_program.set_vec3("light.position", light.get_position());
-        shader_program.set_vec3("light.intensity", light.get_intensity());
-        shader_program.set_float("light.constant", light.get_constant());
-        shader_program.set_float("light.linear", light.get_linear());
-        shader_program.set_float("light.quadratic", light.get_quadratic());
-        shader_program.set_vec3("camera_position", camera.get_position());
-        shader_program.set_matrix4("projection", projection);
-        shader_program.set_matrix4("view", view);
-        shader_program.set_matrix4("model", model);
-        shader_program.set_matrix4("light_space_matrix", light_space_matrix);
+        obj_shader.use();
+        obj_shader.set_vec3("light.position", light.get_position());
+        obj_shader.set_vec3("light.intensity", light.get_intensity());
+        obj_shader.set_float("light.constant", light.get_constant());
+        obj_shader.set_float("light.linear", light.get_linear());
+        obj_shader.set_float("light.quadratic", light.get_quadratic());
+        obj_shader.set_vec3("camera_position", camera.get_position());
+        obj_shader.set_matrix4("projection", projection);
+        obj_shader.set_matrix4("view", view);
+        obj_shader.set_matrix4("model", model);
+        obj_shader.set_matrix4("light_space_matrix", light_space_matrix);
         glActiveTexture(GL_TEXTURE0);
-        shader_program.set_int("depth_map", 0);
+        obj_shader.set_int("depth_map", 0);
         glBindTexture(GL_TEXTURE_2D, depth_map);
-        model_obj.draw(shader_program);
-        floor_obj.draw(shader_program);
+        model_obj.draw(obj_shader);
+        floor_obj.draw(obj_shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
