@@ -58,7 +58,7 @@ float random_0to1(vec2 uv)
 
 float bias_calculation(const vec3 light_direction)
 {
-    return max(0.04 * (1.0 - dot(fs_in.fragment_normal, light_direction)), 0.005);
+    return max(0.04 * (1.0 - dot(fs_in.fragment_normal, light_direction)), 0.0005);
 }
 
 void poisson_disk_samples(const vec2 random_seed)

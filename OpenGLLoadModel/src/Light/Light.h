@@ -9,7 +9,7 @@
 class Light
 {
 public:
-    Light(const glm::vec3& _position, const glm::vec3& _intensity);
+    Light(const glm::vec3& _position, const glm::vec3& _intensity, const float& _radius = 1.0f);
     ~Light();
 
     void draw(const Shader& _shader);
@@ -72,7 +72,8 @@ private:
     float m_linear{ 0.09f };
     float m_quadratic{ 0.032f };
 
-    GLuint m_VAO, m_VBO;
+    GLuint m_VAO, m_VBO, m_EBO;
+    unsigned int m_index_count{ 0 };
 };
 
 #endif // !GQY_LIGHT_H
