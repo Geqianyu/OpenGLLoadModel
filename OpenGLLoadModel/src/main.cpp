@@ -61,11 +61,11 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader obj_shader("asset/shader/blinn-phong.vert.glsl", "asset/shader/blinn-phong.frag.glsl");
-    Shader light_shader("asset/shader/lightShader.vert.glsl", "asset/shader/lightShader.frag.glsl");
+    Shader obj_shader("asset/shader/blinnPhong.vert.glsl", "asset/shader/blinnPhong.frag.glsl");
+    Shader light_shader("asset/shader/light.vert.glsl", "asset/shader/light.frag.glsl");
     Shader depth_map_shader("asset/shader/depthMap.vert.glsl", "asset/shader/depthMap.frag.glsl");
 
-    Light light(glm::vec3(20.0f, 20.0f, 20.0f), glm::vec3(50.0f, 50.0f, 50.0f));
+    Light light(glm::vec3(10.0f, 20.0f, 0.0f), glm::vec3(50.0f, 50.0f, 50.0f));
 
     Model model_obj("asset/obj/nanosuit/nanosuit.obj");
     Model floor_obj("asset/obj/floor/floor.obj");
